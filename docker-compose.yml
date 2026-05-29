@@ -393,4 +393,4 @@ services:
         condition: service_healthy
       prometheus:
         condition: service_started
-    command: ["pytest", "-q", "-s"]
+    command: ["pytest", "-q", "-s", "tests/integration", "tests/e2e", "tests/test_observability.py"]

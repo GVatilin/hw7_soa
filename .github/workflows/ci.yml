@@ -53,8 +53,11 @@ jobs:
       - name: Wait for stack
         run: python scripts/wait_for_stack.py
 
-      - name: Integration and E2E tests
-        run: docker compose run --rm tests
+      - name: Integration tests
+        run: docker compose run --rm tests pytest -q -s tests/integration tests/test_observability.py
+
+      - name: E2E tests
+        run: docker compose run --rm tests pytest -q -s tests/e2e
 
       - name: Load test
         run: docker compose run --rm k6
