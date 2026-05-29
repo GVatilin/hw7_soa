@@ -1,0 +1,46 @@
+groups:
+  - name: movie-system
+    rules:
+      - alert: ServiceDown
+        expr: up{job=~"producer|aggregation-service|export-service"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.job }} is unavailable"
+          description: "Prometheus cannot scrape {{ $labels.job }} for 30 seconds."
+
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(http_request_errors_total{job=~"producer|aggregation-service|export-service"}[5m]))
+          /
+          clamp_min(sum(rate(http_requests_total{job=~"producer|aggregation-service|export-service"}[5m])), 0.001)
+          > 0.05
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High API error rate"
+          description: "More than 5% of API requests have failed during the last 5 minutes."
+
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(http_request_duration_seconds_bucket{job=~"producer|aggregation-service|export-service"}[5m])) by (job, le)
+          ) > 1
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.job }} p95 latency is high"
+          description: "p95 latency is above 1 second for {{ $labels.job }}."
+
+      - alert: KafkaConsumerLag
+        expr: sum(kafka_consumergroup_lag{consumergroup="clickhouse-movie-events"}) > 100
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "ClickHouse Kafka consumer is lagging"
+          description: "movie-events consumer lag is above 100 messages."

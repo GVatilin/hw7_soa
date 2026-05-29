@@ -1,0 +1,12 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: local-dev
+  group_by: ["alertname", "job"]
+  group_wait: 5s
+  group_interval: 30s
+  repeat_interval: 30m
+
+receivers:
+  - name: local-dev

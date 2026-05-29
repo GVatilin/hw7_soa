@@ -1,0 +1,97 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse"},
+      "fieldConfig": {
+        "defaults": {
+          "custom": {"displayMode": "color-background", "align": "center"},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "#c4162a", "value": null},
+              {"color": "#ff780a", "value": 10},
+              {"color": "#fade2a", "value": 25},
+              {"color": "#5794f2", "value": 50},
+              {"color": "#37872d", "value": 75}
+            ]
+          },
+          "color": {"mode": "thresholds"},
+          "unit": "percent",
+          "decimals": 1,
+          "min": 0,
+          "max": 100
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byName", "options": "cohort_date"},
+            "properties": [
+              {"id": "custom.displayMode", "value": "auto"},
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "transparent"}},
+              {"id": "unit", "value": "dateUS"},
+              {"id": "custom.width", "value": 120}
+            ]
+          }
+        ]
+      },
+      "gridPos": {"h": 9, "w": 24, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"showHeader": true, "footer": {"show": false}},
+      "targets": [
+        {
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse"},
+          "editorType": "sql",
+          "format": 1,
+          "rawSql": "SELECT cohort_date, round(maxIf(retention_rate * 100, day_number = 0), 1) AS \"Day 0\", round(maxIf(retention_rate * 100, day_number = 1), 1) AS \"Day 1\", round(maxIf(retention_rate * 100, day_number = 2), 1) AS \"Day 2\", round(maxIf(retention_rate * 100, day_number = 3), 1) AS \"Day 3\", round(maxIf(retention_rate * 100, day_number = 4), 1) AS \"Day 4\", round(maxIf(retention_rate * 100, day_number = 5), 1) AS \"Day 5\", round(maxIf(retention_rate * 100, day_number = 6), 1) AS \"Day 6\", round(maxIf(retention_rate * 100, day_number = 7), 1) AS \"Day 7\" FROM movie_analytics.agg_retention_cohort_daily FINAL WHERE cohort_date >= today() - 30 GROUP BY cohort_date ORDER BY cohort_date",
+          "refId": "A"
+        }
+      ],
+      "title": "Retention Cohort Heatmap (Day 0..7)",
+      "type": "table"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse"},
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 9},
+      "id": 2,
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single", "sort": "none"}},
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse"}, "editorType": "sql", "format": 0, "rawSql": "SELECT metric_date AS time, value FROM movie_analytics.agg_daily_metrics FINAL WHERE metric_name = 'DAU' ORDER BY metric_date", "refId": "A"}],
+      "title": "DAU",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse"},
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 9},
+      "id": 3,
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single", "sort": "none"}},
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse"}, "editorType": "sql", "format": 0, "rawSql": "SELECT metric_date AS time, value * 100 AS conversion_percent FROM movie_analytics.agg_daily_metrics FINAL WHERE metric_name = 'VIEW_CONVERSION' ORDER BY metric_date", "refId": "A"}],
+      "title": "View Conversion %",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse"},
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 17},
+      "id": 4,
+      "options": {"showHeader": true},
+      "targets": [{"datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse"}, "editorType": "sql", "format": 1, "rawSql": "SELECT movie_id, views FROM movie_analytics.agg_top_movies_daily FINAL WHERE metric_date = today() ORDER BY rank", "refId": "A"}],
+      "title": "Top Movies Today",
+      "type": "table"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": ["movie", "analytics"],
+  "templating": {"list": []},
+  "time": {"from": "now-30d", "to": "now"},
+  "timezone": "browser",
+  "title": "Movie Analytics Dashboard",
+  "uid": "movie-analytics-dashboard",
+  "version": 1
+}
