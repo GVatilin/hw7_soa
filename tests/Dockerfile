@@ -1,8 +1,8 @@
 FROM python:3.11-slim
 
-WORKDIR /tests
+WORKDIR /app
 
-COPY requirements.txt /tests/requirements.txt
-RUN pip install --no-cache-dir -r /tests/requirements.txt
+COPY requirements.txt /app/tests/requirements.txt
+RUN pip install --no-cache-dir -r /app/tests/requirements.txt
 
-COPY . /tests
+COPY . /app/tests
