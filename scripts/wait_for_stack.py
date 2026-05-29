@@ -14,28 +14,33 @@ CHECKS = {
 }
 
 
-def _healthy(url: str) -> bool:
+def _healthy(name: str, url: str) -> bool:
     try:
         with urllib.request.urlopen(url, timeout=5) as response:
             return 200 <= response.status < 300
-    except (urllib.error.URLError, TimeoutError):
+    except (urllib.error.URLError, TimeoutError, ConnectionError, OSError) as exc:
+        print(f"{name} not ready yet: {type(exc).__name__}: {exc}")
         return False
 
 
 def main() -> None:
     deadline = time.time() + 240
     pending = dict(CHECKS)
+
     while pending and time.time() < deadline:
         for name, url in list(pending.items()):
-            if _healthy(url):
+            if _healthy(name, url):
                 print(f"{name} is ready")
                 pending.pop(name)
+
         if pending:
             print(f"waiting for: {', '.join(sorted(pending))}")
             time.sleep(5)
 
     if pending:
-        raise SystemExit(f"stack did not become healthy: {json.dumps(pending, indent=2)}")
+        raise SystemExit(
+            f"stack did not become healthy: {json.dumps(pending, indent=2)}"
+        )
 
 
 if __name__ == "__main__":
