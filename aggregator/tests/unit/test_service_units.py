@@ -26,7 +26,7 @@ def test_collect_top_movies_maps_clickhouse_rows() -> None:
             "metric_date": date(2024, 1, 1),
             "rank": 1,
             "movie_id": "movie-1",
-            "views": 7,
+            "views": 8,
             "computed_at": datetime(2024, 1, 1, tzinfo=timezone.utc),
         }
     ]
